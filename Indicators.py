@@ -11,7 +11,7 @@ def simple_moving_average(ticker,period):
 
     data = df.equity_data(ticker, period)
     close = data.loc[:,'Close']
-    PMA = np.sum(close)/period
+    PMA = np.sum(close)/(period + 1)
     PMA = PMA.iat[0]
 
     return form_b(PMA)
