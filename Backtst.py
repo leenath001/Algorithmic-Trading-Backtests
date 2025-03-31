@@ -19,8 +19,8 @@ def is_pos(n):
 def SMA_backtest(ticker,SMA_window): 
 
     # Backtest for Simple Moving Average Strategy. SMA_window gives period for rolling average to be calculated 
-    # Buy conditions: Buy first instance of SMA > equity price. Hold for all other instances following.
-    # Sell conditions: Sell first instance of SMA < equity price. Do nothing for all other instances following. 
+    # Buy conditions: Buy first instance of SMA < equity price. Hold for all other instances following.
+    # Sell conditions: Sell first instance of SMA > equity price. Do nothing for all other instances following. 
     
     # SMA period
     window = SMA_window
@@ -36,7 +36,7 @@ def SMA_backtest(ticker,SMA_window):
     delta = delta.apply(is_pos)
     delta = pd.DataFrame(delta)
 
-    # True -> SMA > equity, buy/hold. False -> equity > SMA, do nothing/sell
+    # True -> SMA < equity, buy/hold. False -> equity > SMA, do nothing/sell
 
     # Running backtest
     P = 0 # Boolean. 0 -> no position, 1 -> long positon
