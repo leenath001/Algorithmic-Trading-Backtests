@@ -72,3 +72,12 @@ def SMA_backtest(ticker,SMA_window):
     comb = pd.concat([equity, SMA, delta,valuevec,buyhold], axis=1)
     print()
     print(comb.iloc[window-1:,:])
+
+    plt.figure()
+    plt.plot(comb.index,valuevec)
+    plt.plot(comb.index,buyhold)
+    plt.xlabel("Timestamp")
+    plt.ylabel("Value")
+    plt.xticks(rotation=45)
+    plt.title("SMA strategy vs Buy & Hold")
+    plt.show()
