@@ -9,6 +9,6 @@
 
 ## Backtest.SMA_backtest(ticker,window)
 *  SMA_window gives period for rolling average to be calculated 
-*  Buy conditions: Buy first instance of SMA > equity price. Hold for all other instances following.
-*  Sell conditions: Sell first instance of SMA < equity price. Do nothing for all other instances following. 
+*  Buy conditions: Buy first instance of SMA < equity price. Hold for all other instances following.
+*  Sell conditions: Sell first instance of SMA > equity price. Do nothing for all other instances following. 
     
