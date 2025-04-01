@@ -88,6 +88,15 @@ def SMA_backtest(ticker,SMA_window):
     plt.plot(comb.index,comb.loc[:,'Close Prices'],label = '{} Close Prices'.format(ticker))
     plt.plot(comb.index,comb.loc[:,'5d SMA'],label = '{}d SMA'.format(window))
     plt.xlabel("Timestamp")
+
+    buy_dates = actionvec[actionvec["Action"] == "B"].index
+    for date in buy_dates:
+        plt.axvline(x=date, color='green', linestyle='--', alpha=0.1, label="Buy" if date == buy_dates[0] else "")
+
+    sell_dates = actionvec[actionvec["Action"] == "S"].index
+    for date in sell_dates:  
+        plt.axvline(x=date, color='red', linestyle='--', alpha=0.1, label="Sell" if date == sell_dates[0] else "")
+
     plt.ylabel("Value")
     plt.xticks(rotation=30)
     plt.legend()
