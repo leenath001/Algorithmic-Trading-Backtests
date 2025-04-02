@@ -5,7 +5,7 @@ import numpy as np
 import Indicators as I
 import matplotlib.pyplot as plt
 
-## Test how SMA strategy performs against buy/hold
+## Test how SMA strategy performs against buy/hold. WORKING TO ENSURE NO DATA LEAKAGE
 
 # options for displaying data
 pd.set_option('display.max_rows', None)
@@ -16,6 +16,7 @@ np.set_printoptions(suppress=True, formatter={'float': '{:.2f}'.format})
 def is_pos(n):
     return n > 0
 
+# Check for data leakage
 def SMA_backtest(ticker,SMA_window): 
 
     # Backtest for Simple Moving Average Strategy. SMA_window gives period for rolling average to be calculated 
@@ -69,6 +70,7 @@ def SMA_backtest(ticker,SMA_window):
             actionvec[i] = 'NA'
 
     # creating dataframe for comparison of strategy
+    title = '{}d SMA'.format(window)
     buyhold = pd.DataFrame(buyhold, index = equity.index)
     buyhold = buyhold.rename(columns={buyhold.columns[0]: 'Buy/Hold'})
     valuevec = pd.DataFrame(valuevec, index = equity.index)
@@ -76,7 +78,7 @@ def SMA_backtest(ticker,SMA_window):
     actionvec = actionvec.rename(columns={actionvec.columns[0]: 'Action'})
     valuevec = valuevec.rename(columns={valuevec.columns[0]: 'Strat Val'})
     equity = equity.rename(columns={equity.columns[0]: 'Close Prices'})
-    SMA = SMA.rename(columns={SMA.columns[0]: '{}d SMA'.format(window)})
+    SMA = SMA.rename(columns={SMA.columns[0]: title})
     delta = delta.rename(columns={delta.columns[0]: 'isPos'})
     comb = pd.concat([equity, SMA, delta,actionvec, valuevec,buyhold], axis=1)
     print()
@@ -85,17 +87,19 @@ def SMA_backtest(ticker,SMA_window):
     plt.figure()
     plt.plot(comb.index,valuevec,label = 'Strategy')
     plt.plot(comb.index,buyhold,label = 'Buy/Hold')
-    plt.plot(comb.index,comb.loc[:,'Close Prices'],label = '{} Close Prices'.format(ticker))
-    plt.plot(comb.index,comb.loc[:,'5d SMA'],label = '{}d SMA'.format(window))
+    plt.plot(comb.index,comb.loc[:,'Close Prices'],label = title,color = 'black')
+    plt.plot(comb.index,comb.loc[:,title],label = '{}d SMA'.format(window),color = 'grey')
     plt.xlabel("Timestamp")
 
     buy_dates = actionvec[actionvec["Action"] == "B"].index
     for date in buy_dates:
-        plt.axvline(x=date, color='green', linestyle='--', alpha=0.1, label="Buy" if date == buy_dates[0] else "")
+        plt.scatter(x=date,y = comb.loc[date,title], color='green', marker = 'v',s = 10)
+        #plt.axvline(x=date,ymax = comb.loc[date,title],color='green',alpha = .1)
 
     sell_dates = actionvec[actionvec["Action"] == "S"].index
     for date in sell_dates:  
-        plt.axvline(x=date, color='red', linestyle='--', alpha=0.1, label="Sell" if date == sell_dates[0] else "")
+        plt.scatter(x=date,y = comb.loc[date,title], color='red',marker = 'v',s = 10)
+        #plt.axvline(x=date,ymax = comb.loc[date,title],color='red',alpha = .1)
 
     plt.ylabel("Value")
     plt.xticks(rotation=30)
