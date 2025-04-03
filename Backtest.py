@@ -26,10 +26,6 @@ def SMA_backtest(ticker,window):
     warnings.filterwarnings("ignore")
     pd.set_option('display.float_format', '{:.2f}'.format)
 
-    # Boolean function creation
-    def is_pos(n):
-        return n > 0
-
     # Backtest for Simple Moving Average Strategy. SMA_window gives period for rolling average to be calculated 
     # Buy conditions: Buy first instance of SMA > equity price. Hold for all other instances following.
     # Sell conditions: Sell first instance of SMA < equity price. Do nothing for all other instances following. 
