@@ -41,12 +41,12 @@ def SMA_backtest(ticker,window):
     # Sell conditions: Sell first instance of SMA < equity price. Do nothing for all other instances following. 
 
     # getting equity data, SMA data, and Boolean data (used to define when entry threshold crossed)
-    data = yf.download(ticker, period='1y', interval='1d')
+    data = yf.download(ticker, period='3y', interval='1d')
     SMA = data['Close'].rolling(window).mean().shift(1)
     open = data[['Open']]
     close = data[['Close']]
     SMA = SMA.iloc[window-1:]
-    delta = close - SMA                         # Truth vector
+    delta = SMA - close                        # Truth vector
     delta = delta.apply(is_pos)
     delta = pd.DataFrame(delta[window-1:])
     open = open[window-1:]
@@ -55,10 +55,14 @@ def SMA_backtest(ticker,window):
 
     # Running backtest
     P = 0                                       # Boolean. 0 -> no position, 1 -> long positon
-    alo = 500                                   # initial allocation, should change to # of stocks 
+    alo = open.iloc[0]                          # initial allocation, should change to # of stocks 
+    alo = alo[0]
     valuevec = alo * np.ones(len(SMA))          # stores bt historical values
     buyhold = alo * np.ones(len(SMA))           # values of buy/hold 
     actionvec = np.empty(len(SMA),object)
+
+    # what about insead of going all the way back we do open, close for comparison
+    # current period and last period 
 
     # condition to run 
     for i in range(2,len(SMA)):
@@ -105,8 +109,8 @@ def SMA_backtest(ticker,window):
     plt.figure()
     plt.plot(comb.index,comb.loc[:,"Strat Val"],label = 'Strategy')
     #plt.plot(comb.index,comb.loc[:,"Buy/Hold"],label = 'Buy/Hold')
-    plt.plot(close.index,close,label = "Close",color = 'black')
-    plt.plot(comb.index,comb.loc[:,title],label = title,color = 'grey')
+    plt.plot(close.index,close,label = "Close",color = 'orange')
+    plt.plot(comb.index,comb.loc[:,title],label = title,color = 'black')
     plt.xlabel("Timestamp")
 
     buy_dates = comb[actionvec["Action"] == "B"].index
@@ -114,17 +118,19 @@ def SMA_backtest(ticker,window):
     for date in buy_dates:
         shifted_date = comb.index[comb.index.get_loc(date) - 1]  # Shift back by 2
         plt.scatter(x=shifted_date, y=comb.loc[date, title], color='green', marker='v', s=10)
-        plt.scatter(x=shifted_date, y=comb.loc[date, 'Strat Val'], color='green', marker='v', s=10)
+        plt.scatter(x=shifted_date, y=comb.loc[date, 'Strat Val'] + 2, color='green', marker='v', s=10)
 
     sell_dates = actionvec[actionvec["Action"] == "S"].index
 
     for date in sell_dates:
         shifted_date = comb.index[comb.index.get_loc(date) - 1]  # Shift back by 2
-        plt.scatter(x=shifted_date, y=comb.loc[date, title], color='red', marker='v', s=10)
-        plt.scatter(x=shifted_date, y=comb.loc[date, 'Strat Val'], color='red', marker='v', s=10)
+        plt.scatter(x=shifted_date, y=comb.loc[date, title] , color='red', marker='v', s=10)
+        plt.scatter(x=shifted_date, y=comb.loc[date, 'Strat Val'] +2, color='red', marker='v', s=10)
 
     plt.ylabel("Value")
     plt.xticks(rotation=30)
     plt.legend()
     plt.title("SMA strategy vs Buy & Hold : {}".format(ticker))
     plt.show()
+
+
