@@ -4,6 +4,7 @@ import pandas as pd
 import numpy as np
 import Indicators as I
 import matplotlib.pyplot as plt
+import warnings
 
 ## Test how SMA strategy performs against buy/hold
 
@@ -18,13 +19,6 @@ def is_pos(n):
 
 # Check for data leakage
 def SMA_backtest(ticker,window): 
-    import Data_Funcs as df
-    import yfinance as yf
-    import pandas as pd
-    import numpy as np
-    import Indicators as I
-    import matplotlib.pyplot as plt
-    import warnings
 
     # options for displaying data
     pd.set_option('display.max_rows', None)
