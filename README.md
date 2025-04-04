@@ -17,3 +17,7 @@
 *  Uses first OTM put and call volume to calculate ratio
 *  Ratio > 1 implies expected bearish move -> traders buying more puts than calls
 *  Ratio < 1 implies expected bullish move -> traders buying more calls than puts
+
+## Indicators.RSI(ticker)
+*  Returns RSI score at open based on previous 14 trading sessions.
+*  Typically, RSI < 30 -> oversold, RSI < 70 -> overbought
