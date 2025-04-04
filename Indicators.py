@@ -84,6 +84,60 @@ def Put_Call_ratio(ticker):
         str = "{} Put to Call Ratio : {}".format(dates,ratio)
         print(str)
 
+def RSI(ticker):
+    
+    import yfinance as yf
+    import pandas as pd
+    import numpy as np
+    import Indicators as I
+    import matplotlib.pyplot as plt
+    import warnings
+
+    def is_pos(n):
+        return n > 0
+
+    # options for displaying data
+    warnings.filterwarnings("ignore")
+
+# getting ticker data
+    data = yf.download(ticker, period='1mo', interval='1d')
+    open = data[["Open"]]
+    close = data[["Close"]]
+    percents = (close.values - open.values)/open.values
+    percents = pd.DataFrame(percents, index = open.index, columns=["% Change"])
+    truths = percents.apply(is_pos)
+    truths = truths.rename(columns={'% Change': 'isPos'})
+ 
+    # want to calculate rsi for period of 14 days (SEE NOTES)
+
+    # NEED TO CHANGE ST WE HAVE VEC OF RSI FOR EACH DAY
+    recent_percents = percents.iloc[-15:-1,0]
+    recent_truths = truths.iloc[-15:-1,0]
+
+    possum = 0
+    negsum = 0
+    poscount = 0
+    negcount = 0
+
+    for i in range(len(recent_truths)):
+    
+        if recent_truths.iloc[i] == True:
+            possum += recent_percents.iloc[i]
+            poscount += 1
+
+        elif recent_truths.iloc[i] == False:
+            negsum += recent_percents.iloc[i]
+            negcount += 1
+
+    avgain = possum/poscount
+    avloss = negsum/negcount
+
+    # RSI is calculated for yesterday, for comparison today. 
+    RSI = 100 - 100/(1 - (avgain/avloss))
+    
+    return RSI
+
+
 
 
 
