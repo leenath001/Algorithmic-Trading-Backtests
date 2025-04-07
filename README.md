@@ -8,12 +8,13 @@
 * Working to get this to take a list of tickers and output a corr matrix for all. 
 
 ## SMA_Backtest.SMA_backtest(ticker,window)
-*  UNDER WORK TO ENSURE CONDITIONS COVER ALL CASES
+*  ALL ACTIONS OCCUR AT OPEN
 *  window gives period for rolling average to be calculated 
 *  Buy condition: Buy first instance of SMA < equity price. Hold for all other instances following.
 *  Sell condition: Sell first instance of SMA > equity price. Do nothing for all other instances following.
 
 ## RSI_breakout_bt.RSI_breakout(ticker,window)
+*  ALL ACTIONS OCCUR AT OPEN
 *  window gives period for RSI to be calculated
 *  Buy condition: Buy first instance that RSI < 70. Hold for all other instances following.
 *  Sell conditon: Sell first instance that RSI > 70. Do nothing for all other instances following.
