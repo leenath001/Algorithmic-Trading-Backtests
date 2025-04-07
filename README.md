@@ -7,11 +7,16 @@
 * Takes 2 tickers and period - outputs correlation between two equities specified.
 * Working to get this to take a list of tickers and output a corr matrix for all. 
 
-## Backtest.SMA_backtest(ticker,window)
+## SMA_Backtest.SMA_backtest(ticker,window)
 *  UNDER WORK TO ENSURE CONDITIONS COVER ALL CASES
-*  SMA_window gives period for rolling average to be calculated 
-*  Buy conditions: Buy first instance of SMA < equity price. Hold for all other instances following.
-*  Sell conditions: Sell first instance of SMA > equity price. Do nothing for all other instances following. 
+*  window gives period for rolling average to be calculated 
+*  Buy condition: Buy first instance of SMA < equity price. Hold for all other instances following.
+*  Sell condition: Sell first instance of SMA > equity price. Do nothing for all other instances following.
+
+## RSI_breakout_bt.RSI_breakout(ticker,window)
+*  window gives period for RSI to be calculated
+*  Buy condition: Buy first instance that RSI < 70. Hold for all other instances following.
+*  Sell conditon: Sell first instance that RSI > 70. Do nothing for all other instances following.
     
 ## Indicators.Put_Call_ratio(ticker)
 *  Returns ratio of puts/calls traded on most active contracts
