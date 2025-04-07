@@ -19,7 +19,7 @@ warnings.filterwarnings("ignore")
 
 def RSI_breakout(ticker,window):
     # getting ticker data & intializing vectors for RSI calc
-    data = yf.download(ticker, period='5y', interval='1d')
+    data = yf.download(ticker, period='1y', interval='1d')
     open = data[["Open"]]
     close = data[["Close"]]
     percents = (close.values - open.values)/open.values
@@ -29,7 +29,7 @@ def RSI_breakout(ticker,window):
     RSIvec = np.ones(len(truths))
  
     # want to calculate rsi for period of 14 days (SEE NOTES)
-    for i in range(14,len(percents)):
+    for i in range(window,len(percents)):
 
         possum = 0
         negsum = 0
@@ -51,8 +51,13 @@ def RSI_breakout(ticker,window):
                 negsum += recent_percents.iloc[j]
                 negcount += 1
 
-        avgain = possum/poscount
-        avloss = negsum/negcount
+        if poscount == 0:
+            RSIvec[i] = 0
+        elif negcount == 0:
+            RSIvec[i] = 100
+        else:
+            avgain = possum/poscount
+            avloss = negsum/negcount
 
         # RSI is calculated for yesterday, for comparison today. 
         RSIvec[i] = 100 - 100/(1 - (avgain/avloss))
