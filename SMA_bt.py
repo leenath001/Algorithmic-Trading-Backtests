@@ -19,7 +19,7 @@ def is_pos(n):
     return n > 0
 
 # Check for data leakage
-def SMA_backtest(ticker,window): 
+def SMA_backtest(ticker,window,year): 
 
     warnings.filterwarnings("ignore")
 
@@ -28,12 +28,12 @@ def SMA_backtest(ticker,window):
     # Sell conditions: Sell first instance of SMA < equity price. Do nothing for all other instances following. 
 
     # getting equity data, SMA data, and Boolean data (used to define when entry threshold crossed)
-    data = yf.download(ticker, period='5y', interval='1d')
+    data = yf.download(ticker, period='10y', interval='1d')
     SMA = data['Close'].rolling(window).mean().shift(1)
     open = data[['Open']]
     close = data[['Close']]
     SMA = SMA.iloc[window-1:]
-    delta = close - SMA                         # Truth vector, close - SMA -> mean reversion, SMA - close -> overvaluation capture 
+    delta = SMA - close                         # Truth vector, close - SMA -> mean reversion, SMA - close -> overvaluation capture 
     delta = delta.apply(is_pos)
     delta = pd.DataFrame(delta[window-1:])
     SMA = pd.DataFrame(SMA)
@@ -61,7 +61,7 @@ def SMA_backtest(ticker,window):
             valuevec[i] = valuevec[i-1] * (1 +  (CminO[i])/open.iloc[i,0]) * (1 + (open.iloc[i,0] - close.iloc[i-1,0])/close.iloc[i-1,0])
             actionvec[i] = 'H'
 
-        elif P == 1 and delta1 == True and delta2 == False: # sell
+        elif P == 1 and delta1 == True and delta2 == False or P == 1 and (1 + (close.iloc[i-1,0]-open.iloc[i-1,0])/open.iloc[i-1,0]) <=.99:
             P = 0 
             valuevec[i] = valuevec[i-1] * (1 + (open.iloc[i,0]-close.iloc[i-1,0])/close.iloc[i-1,0])
             actionvec[i] = 'S'
@@ -74,11 +74,11 @@ def SMA_backtest(ticker,window):
     title = '{}d SMA'.format(window)
     valuevec = pd.DataFrame(valuevec, index = open.index, columns=["Strat Val"])
     actionvec = pd.DataFrame(actionvec, index = open.index,columns=["Action"])
-    comb = pd.concat([comb,actionvec, valuevec.round(2)], axis=1)
-    SMA = SMA.iloc[1:,:]
-    
-    print()
-    print(comb)
+    SMA = SMA.rename(columns={'TSLA':"SMA"})
+    comb = pd.concat([comb,SMA.round(2),actionvec,valuevec.round(2)], axis=1)
+
+    #print()
+    #print(comb)
 
     plt.figure()
     plt.plot(comb.index,comb.loc[:,"Strat Val"],label = 'Strategy',color = 'green')
@@ -103,7 +103,24 @@ def SMA_backtest(ticker,window):
     plt.ylabel("Value")
     plt.xticks(rotation=30)
     plt.legend()
-    plt.title("SMA strategy vs Buy & Hold : {}".format(ticker))
+    plt.title("SMA strategy vs Buy & Hold : {} (S0 = {})".format(ticker,alo))
     plt.show()
 
-    return comb
+    text = '\n'.join((
+        'Trading Days : {}'.format(len(comb)),
+        'P&L : ${}'.format((comb.iloc[len(comb)-1,4]- alo).round(2))
+    ))
+
+    def slice_by_year(df):
+    # Create a dictionary of DataFrames split by year
+        year_slices = {
+            year: group for year, group in df.groupby(df.index.year)
+    }
+        return year_slices
+
+    yearly_data = slice_by_year(comb)
+
+    if year == 'all':
+        return comb,text
+    else:
+        return yearly_data[year],text
