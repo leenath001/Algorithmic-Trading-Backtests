@@ -102,7 +102,6 @@ def RSI_breakout(ticker,window):
 
     buy_dates = comb[comb["Action"] == "B"].index
 
-
     for date in buy_dates:
         shifted_date = comb.index[comb.index.get_loc(date) - 1]  # Shift back by 2
         #plt.axvline(x = shifted_date,color='green')
