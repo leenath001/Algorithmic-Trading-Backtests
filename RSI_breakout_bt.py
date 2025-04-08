@@ -17,7 +17,7 @@ pd.set_option('display.max_columns', None)
 np.set_printoptions(suppress=True, formatter={'float': '{:.2f}'.format})
 warnings.filterwarnings("ignore")
 
-def RSI_breakout(ticker,window):
+def RSI_breakout(ticker,window,year):
     # getting ticker data & intializing vectors for RSI calc
     data = yf.download(ticker, period='5y', interval='1d')
     open = data[["Open"]]
@@ -93,7 +93,7 @@ def RSI_breakout(ticker,window):
     valuevec = pd.DataFrame(valuevec.round(2),index = comb.index,columns = ['Strat Val'])
     actionvec = pd.DataFrame(actionvec,index = comb.index,columns = ['Action'])
     comb = pd.concat([comb.round(2),valuevec,actionvec], axis=1)
-    print(comb)
+    #print(comb)
 
     plt.figure()
     plt.plot(comb.index,comb.loc[:,"Strat Val"],label = 'Strategy')
@@ -101,6 +101,7 @@ def RSI_breakout(ticker,window):
     plt.xlabel("Timestamp")
 
     buy_dates = comb[comb["Action"] == "B"].index
+
 
     for date in buy_dates:
         shifted_date = comb.index[comb.index.get_loc(date) - 1]  # Shift back by 2
@@ -119,7 +120,24 @@ def RSI_breakout(ticker,window):
     plt.ylabel("Value")
     plt.xticks(rotation=30)
     plt.legend()
-    plt.title("SMA strategy vs Buy & Hold : {}".format(ticker))
+    plt.title("SMA strategy vs Buy & Hold : {} (S0 = {})".format(ticker,alo.round(2)))
     plt.show()
 
-    return comb
+    text = '\n'.join((
+        'Trading Days : {}'.format(len(comb)),
+        'P&L : ${}'.format((comb.iloc[len(comb)-1,4]- alo).round(2))
+    ))
+
+    def slice_by_year(df):
+    # Create a dictionary of DataFrames split by year
+        year_slices = {
+            year: group for year, group in df.groupby(df.index.year)
+    }
+        return year_slices
+
+    yearly_data = slice_by_year(comb)
+
+    if year == 'all':
+        return comb,text
+    else:
+        return yearly_data[year],text
