@@ -18,13 +18,17 @@
 *  window gives period for RSI to be calculated
 *  Buy condition: Buy first instance that RSI < 70. Hold for all other instances following.
 *  Sell conditon: Sell first instance that RSI > 70. Do nothing for all other instances following.
+*  (ticker = TSLA, window = 9) beats buy/hold
     
 ## Indicators.Put_Call_ratio(ticker)
 *  Returns ratio of puts/calls traded on most active contracts
 *  Uses first OTM put and call volume to calculate ratio
 *  Ratio > 1 implies expected bearish move -> traders buying more puts than calls
 *  Ratio < 1 implies expected bullish move -> traders buying more calls than puts
+*  (ticker = UAMY, window = 8) beats buy/hold
 
 ## Indicators.RSI(ticker)
 *  Returns RSI score at open based on previous 14 trading sessions.
 *  Typically, RSI < 30 -> oversold, RSI < 70 -> overbought
+
+Currently working on scalping, continual put, pair trading strats (along with implementation)
