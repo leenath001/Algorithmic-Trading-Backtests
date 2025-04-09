@@ -18,6 +18,18 @@ np.set_printoptions(suppress=True, formatter={'float': '{:.2f}'.format})
 warnings.filterwarnings("ignore")
 
 def RSI_breakout(ticker,window,year):
+
+    ''' INVERVAL PARAMETERS
+    "1m" Max 7 days, only for recent data
+    "2m" Max 60 days
+    "5m" Max 60 days
+    "15m" Max 60 days
+    "30m" Max 60 days
+    "60m" Max 730 days (~2 years)
+    "90m" Max 60 days
+    "1d"
+    '''
+    
     # getting ticker data & intializing vectors for RSI calc
     data = yf.download(ticker, period='5y', interval='1d')
     open = data[["Open"]]
@@ -123,10 +135,16 @@ def RSI_breakout(ticker,window,year):
     plt.title("SMA strategy vs Buy & Hold : {} (S0 = {})".format(ticker,alo.round(2)))
     plt.show()
 
+    pctg = (comb.iloc[len(comb)-1,4]-alo)/alo * 100
+    bhpctg = (comb.iloc[len(comb)-1,1]-comb.iloc[0,0])/comb.iloc[0,0] * 100
+
     text = '\n'.join((
         'Trading Days : {}'.format(len(comb)),
-        'P&L : ${}'.format((comb.iloc[len(comb)-1,4]- alo).round(2))
+        'P&L : ${}'.format((comb.iloc[len(comb)-1,4]- alo).round(2)),
+        'Growth : {}%'.format(pctg.round(2)),
+        'Buy/Hold Growth : {}%'.format(bhpctg.round(2))
     ))
+
 
     def slice_by_year(df):
     # Create a dictionary of DataFrames split by year
