@@ -27,8 +27,19 @@ def SMA_backtest(ticker,window,year):
     # Buy conditions: Buy first instance of SMA > equity price. Hold for all other instances following.
     # Sell conditions: Sell first instance of SMA < equity price. Do nothing for all other instances following. 
 
+    ''' INVERVAL PARAMETERS
+    "1m" Max 7 days, only for recent data
+    "2m" Max 60 days
+    "5m" Max 60 days
+    "15m" Max 60 days
+    "30m" Max 60 days
+    "60m" Max 730 days (~2 years)
+    "90m" Max 60 days
+    "1d"
+    '''
+
     # getting equity data, SMA data, and Boolean data (used to define when entry threshold crossed)
-    data = yf.download(ticker, period='10y', interval='1d')
+    data = yf.download(ticker, period='30d', interval='1d')
     SMA = data['Close'].rolling(window).mean().shift(1)
     open = data[['Open']]
     close = data[['Close']]
@@ -106,9 +117,14 @@ def SMA_backtest(ticker,window,year):
     plt.title("SMA strategy vs Buy & Hold : {} (S0 = {})".format(ticker,alo))
     plt.show()
 
+    pctg = (comb.iloc[len(comb)-1,4]-alo)/alo * 100
+    bhpctg = (comb.iloc[len(comb)-1,1]-comb.iloc[0,0])/comb.iloc[0,0] * 100
+
     text = '\n'.join((
         'Trading Days : {}'.format(len(comb)),
-        'P&L : ${}'.format((comb.iloc[len(comb)-1,4]- alo).round(2))
+        'P&L : ${}'.format((comb.iloc[len(comb)-1,4]- alo).round(2)),
+        'Growth : {}%'.format(pctg.round(2)),
+        'Buy/Hold Growth : {}%'.format(bhpctg.round(2))
     ))
 
     def slice_by_year(df):
