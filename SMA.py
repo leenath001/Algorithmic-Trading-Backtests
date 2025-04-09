@@ -5,8 +5,9 @@ import numpy as np
 import Indicators as I
 import matplotlib.pyplot as plt
 import warnings
-
-## Test how SMA strategy performs against buy/hold
+from ib_insync import *
+import time
+import pytz
 
 # options for displaying data
 pd.set_option('display.max_rows', None)
@@ -18,7 +19,7 @@ warnings.filterwarnings("ignore")
 def is_pos(n):
     return n > 0
 
-# Check for data leakage
+# Backtest function
 def SMA_backtest(ticker,window,year): 
 
     warnings.filterwarnings("ignore")
@@ -39,7 +40,7 @@ def SMA_backtest(ticker,window,year):
     '''
 
     # getting equity data, SMA data, and Boolean data (used to define when entry threshold crossed)
-    data = yf.download(ticker, period='30d', interval='1d')
+    data = yf.download(ticker, period='1d', interval='1m')
     SMA = data['Close'].rolling(window).mean().shift(1)
     open = data[['Open']]
     close = data[['Close']]
@@ -121,7 +122,7 @@ def SMA_backtest(ticker,window,year):
     bhpctg = (comb.iloc[len(comb)-1,1]-comb.iloc[0,0])/comb.iloc[0,0] * 100
 
     text = '\n'.join((
-        'Trading Days : {}'.format(len(comb)),
+        'Trading Periods : {}'.format(len(comb)),
         'P&L : ${}'.format((comb.iloc[len(comb)-1,4]- alo).round(2)),
         'Growth : {}%'.format(pctg.round(2)),
         'Buy/Hold Growth : {}%'.format(bhpctg.round(2))
@@ -140,3 +141,89 @@ def SMA_backtest(ticker,window,year):
         return comb,text
     else:
         return yearly_data[year],text
+    
+def SMA_tradingfunc(ticker,window):
+    
+    P = 0
+    actionvec = []
+
+    ## setting up ib connection
+    ib = IB()
+    ib.connect('127.0.0.1', 4002, clientId=1)
+
+    ## loop to download data, run thru, take signals and act/trade on them 
+    while True:
+        try:
+
+            # data collection loop (check every 25s)
+            data = yf.download(ticker, period='1d', interval='1m')
+            if data.index.tz is None:
+                data.index = data.index.tz_localize('UTC')
+            data.index = data.index.tz_convert('US/Eastern')
+
+            # loop to handle exception if data empty/not long enough
+            if data.empty or len(data) < window + 2:
+                print("Not enough data yet...")
+                time.sleep(60)
+                continue
+
+            # compute SMA
+            SMA = data['Open'].rolling(window).mean()
+            delta = SMA - data['Open']
+            delta = delta.apply(is_pos)
+        
+            # dataframe
+            comb = pd.concat([data['Open'].round(2),SMA.round(2),delta],axis = 1)
+            comb = comb.iloc[-10:,:]
+            print(comb)
+        
+            # signal logic
+            d1 = comb.iloc[-1,2]
+            d2 = comb.iloc[-2,2]
+    
+            if P == 0 and d1 == False and d2 == True: #buy 
+                P = 1
+                contract = Stock(ticker, 'SMART', 'USD')
+                order = MarketOrder('BUY', 10)
+                actionvec = np.append(actionvec,'B')
+                trade = ib.placeOrder(contract, order)
+                while True:
+                    print("Order Status:", trade.orderStatus.status)
+                    if trade.orderStatus.status == 'Filled':
+                        print('Buy Filled.')
+                        break
+                    time.sleep(5)
+
+            elif P == 1 and d1 == False and d2 == False: # hold, account for slippage
+                actionvec = np.append(actionvec,'H')
+                print('Holding')
+
+            elif P == 1 and d1 == True and d2 == False: # sell @ open
+                P = 0
+                contract = Stock(ticker, 'SMART', 'USD')
+                order = MarketOrder('SELL', 10)
+                actionvec = np.append(actionvec,'S')
+                trade = ib.placeOrder(contract, order)
+                while True:
+                    print("Order Status:", trade.orderStatus.status)
+                    if trade.orderStatus.status == 'Filled':
+                        print('Sell Filled.')
+                        break
+                    time.sleep(5)
+
+            elif P == 0 and d1 == True and d2 == True: # do nothing
+                actionvec = np.append(actionvec,'N')
+                print('No Action')
+
+            time.sleep(60)
+
+        except KeyboardInterrupt:
+            print("Stopped by user.")
+            break
+
+        except Exception as e:
+            print("Error:", e)
+            time.sleep(60)
+
+
+    
