@@ -19,7 +19,7 @@ warnings.filterwarnings("ignore")
 def is_pos(n):
     return n > 0
 
-# Backtest function
+# Backtest function (ensure rules for bt and trade are the same, using same data)
 def SMA_backtest(ticker,window,year): 
 
     warnings.filterwarnings("ignore")
@@ -142,8 +142,8 @@ def SMA_backtest(ticker,window,year):
     else:
         return yearly_data[year],text
 
-# Trading function (add a vector that gets value)
-def SMA_tradingfunc(ticker,window):
+# Trading function 
+def SMA_tradingfunc(ticker,window,type):
     
     P = 0
     actionvec = ['N']
@@ -175,8 +175,12 @@ def SMA_tradingfunc(ticker,window):
 
             # compute SMA
             SMA = data['Open'].rolling(window).mean()
-            delta = data['Open'] - SMA # SMA - data => capturing overvaluation, data - SMA => mean reversion 
-            delta = delta.apply(is_pos)
+            if type == 'mr':
+                delta = data['Open'] - SMA # data - SMA => mean reversion
+                delta = delta.apply(is_pos)
+            elif type == 'ov':
+                delta = SMA - data['Open'] # SMA - data => capturing overvaluation,
+                delta = delta.apply(is_pos)
         
             # dataframe
             comb = pd.concat([data['Open'].round(2),SMA.round(2),delta],axis = 1)
@@ -192,7 +196,7 @@ def SMA_tradingfunc(ticker,window):
             curr_pr = yf.Ticker(ticker)
             curr_pr = curr_pr.fast_info['last_price']
 
-            if P == 0 and d1 == False: #and d2 == True: #buy 
+            if P == 0 and d1 == False and d2 == True: #buy 
                 P = 1
                 contract = Stock(ticker, 'SMART', 'USD')
                 order = MarketOrder('BUY', 10)
@@ -223,7 +227,7 @@ def SMA_tradingfunc(ticker,window):
                 time.sleep(5)
                 print("Order Status:", trade.orderStatus.status)
 
-            elif P == 0 and d1 == True: # and d2 == True or P == 0 and d1 == True and d2 == False or P == 0 and d1 == False and d2 == False: # do nothing
+            elif P == 0 and d1 == True or P == 0 and d1 == d2 == False: # and d2 == True or P == 0 and d1 == True and d2 == False or P == 0 and d1 == False and d2 == False: # do nothing
                 actionvec = np.append(actionvec,'N')
                 valuevec = np.append(valuevec,valuevec[-1])
                 timevec.append(data.index[-1])
