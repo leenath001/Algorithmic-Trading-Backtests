@@ -146,7 +146,7 @@ def SMA_backtest(ticker,window,year):
 def SMA_tradingfunc(ticker,window):
     
     P = 0
-    actionvec = []
+    actionvec = ['N']
     valuevec = []
 
     ## setting up ib connection (id 1)
@@ -170,15 +170,15 @@ def SMA_tradingfunc(ticker,window):
                 continue
 
             # compute SMA
-            SMA = data['Open'].rolling(window).mean()
-            delta = SMA - data['Open'] # SMA - data => capturing overvaluation, data - SMA => mean reversion 
+            SMA = data['Close'].rolling(window).mean()
+            delta = SMA - data['Close'] # SMA - data => capturing overvaluation, data - SMA => mean reversion 
             delta = delta.apply(is_pos)
             
         
             # dataframe
-            comb = pd.concat([data['Open'].round(2),SMA.round(2),delta],axis = 1)
+            comb = pd.concat([data['Close'].round(2),SMA.round(2),delta],axis = 1)
             comb = comb.iloc[-10:,:]
-            comb.columns = ['Open','SMA','Signal']
+            comb.columns = ['Close','SMA','Signal']
             print()
             print(comb)
         
@@ -189,7 +189,9 @@ def SMA_tradingfunc(ticker,window):
             curr_pr = yf.Ticker(ticker)
             curr_pr = curr_pr.fast_info['last_price']
             valuevec = np.append(valuevec,curr_pr)
-    
+
+            # check P = 1, T, T, P = 1,F,T (recent,before last) cases 
+
             if P == 0 and d1 == False and d2 == True: #buy 
                 P = 1
                 contract = Stock(ticker, 'SMART', 'USD')
@@ -220,7 +222,7 @@ def SMA_tradingfunc(ticker,window):
 
             elif P == 0 and d1 == True and d2 == True or P == 0 and d1 == True and d2 == False or P == 0 and d1 == False and d2 == False: # do nothing
                 actionvec = np.append(actionvec,'N')
-                valuevec = np.append(valuevec,valuevec[0])
+                valuevec = np.append(valuevec,valuevec[-1])
                 print('No Action')
                 time.sleep(5)
 
@@ -237,6 +239,6 @@ def SMA_tradingfunc(ticker,window):
     # values returned
     actionvec = pd.DataFrame(actionvec,columns=['Actions'])
     valuevec = pd.DataFrame(valuevec,columns=['Values'])
-    ret = pd.concat([actionvec,valuevec])
+    ret = pd.concat([actionvec,valuevec.round(2)])
 
     return ret
