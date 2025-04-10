@@ -5,7 +5,6 @@
 *  window gives period for rolling average to be calculated, year calls period of data wanted for backtest
 *  Buy condition: Buy first instance of SMA < equity price. Hold for all other instances following.
 *  Sell condition: Sell first instance of SMA > equity price. Do nothing for all other instances following.
-*  (ticker = TSLA, window = 9) beats buy/hold
 
 ## SMA.SMA_tradingfunc(ticker,window,type)
 *  function for employing SMA strategy using interactive brokers (IB) gateway
@@ -20,7 +19,6 @@
 *  window gives period for RSI to be calculated, year calls period of data wanted for backtest
 *  Buy condition: Buy first instance that RSI < 70. Hold for all other instances following.
 *  Sell conditon: Sell first instance that RSI > 70. Do nothing for all other instances following.
-*  (ticker = UAMY, window = 8) beats buy/hold
 
 ## Indicators.simple_moving_average(ticker,period)
 *  Takes inputs ticker (str) and a period (no of days) to return a simple moving average over the specified period. 
