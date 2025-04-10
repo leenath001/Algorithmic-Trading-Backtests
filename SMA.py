@@ -15,7 +15,7 @@ pd.set_option('display.max_columns', None)
 np.set_printoptions(suppress=True, formatter={'float': '{:.2f}'.format})
 warnings.filterwarnings("ignore")
 
-# Boolean function creation
+# Boolean indicator function
 def is_pos(n):
     return n > 0
 
@@ -40,7 +40,7 @@ def SMA_backtest(ticker,window,year):
     '''
 
     # getting equity data, SMA data, and Boolean data (used to define when entry threshold crossed)
-    data = yf.download(ticker, period='1d', interval='1m')
+    data = yf.download(ticker, period='3d', interval='1m',progress=False)
     SMA = data['Close'].rolling(window).mean().shift(1)
     open = data[['Open']]
     close = data[['Close']]
@@ -83,7 +83,7 @@ def SMA_backtest(ticker,window,year):
             actionvec[i] = 'N'
 
     # creating dataframe for comparison of strategy
-    title = '{}d SMA'.format(window)
+    title = '{} per SMA'.format(window)
     valuevec = pd.DataFrame(valuevec, index = open.index, columns=["Strat Val"])
     actionvec = pd.DataFrame(actionvec, index = open.index,columns=["Action"])
     SMA = SMA.rename(columns={'TSLA':"SMA"})
@@ -141,13 +141,14 @@ def SMA_backtest(ticker,window,year):
         return comb,text
     else:
         return yearly_data[year],text
-    
+
+# Trading function
 def SMA_tradingfunc(ticker,window):
     
     P = 0
     actionvec = []
 
-    ## setting up ib connection
+    ## setting up ib connection (id 1)
     ib = IB()
     ib.connect('127.0.0.1', 4002, clientId=1)
 
@@ -156,7 +157,7 @@ def SMA_tradingfunc(ticker,window):
         try:
 
             # data collection loop (check every 25s)
-            data = yf.download(ticker, period='1d', interval='1m')
+            data = yf.download(ticker, period='1d', interval='1m',progress=False)
             if data.index.tz is None:
                 data.index = data.index.tz_localize('UTC')
             data.index = data.index.tz_convert('US/Eastern')
@@ -169,12 +170,13 @@ def SMA_tradingfunc(ticker,window):
 
             # compute SMA
             SMA = data['Open'].rolling(window).mean()
-            delta = SMA - data['Open']
+            delta = SMA - data['Open'] # SMA - data => capturing overvaluation, data - SMA => mean reversion 
             delta = delta.apply(is_pos)
         
             # dataframe
             comb = pd.concat([data['Open'].round(2),SMA.round(2),delta],axis = 1)
             comb = comb.iloc[-10:,:]
+            print()
             print(comb)
         
             # signal logic
@@ -187,16 +189,14 @@ def SMA_tradingfunc(ticker,window):
                 order = MarketOrder('BUY', 10)
                 actionvec = np.append(actionvec,'B')
                 trade = ib.placeOrder(contract, order)
-                while True:
-                    print("Order Status:", trade.orderStatus.status)
-                    if trade.orderStatus.status == 'Filled':
-                        print('Buy Filled.')
-                        break
-                    time.sleep(5)
+                print('Buying')
+                time.sleep(5)
+                print("Order Status:", trade.orderStatus.status)
 
             elif P == 1 and d1 == False and d2 == False: # hold, account for slippage
                 actionvec = np.append(actionvec,'H')
                 print('Holding')
+                time.sleep(5)
 
             elif P == 1 and d1 == True and d2 == False: # sell @ open
                 P = 0
@@ -204,18 +204,16 @@ def SMA_tradingfunc(ticker,window):
                 order = MarketOrder('SELL', 10)
                 actionvec = np.append(actionvec,'S')
                 trade = ib.placeOrder(contract, order)
-                while True:
-                    print("Order Status:", trade.orderStatus.status)
-                    if trade.orderStatus.status == 'Filled':
-                        print('Sell Filled.')
-                        break
-                    time.sleep(5)
+                print('Selling')
+                time.sleep(5)
+                print("Order Status:", trade.orderStatus.status)
 
             elif P == 0 and d1 == True and d2 == True: # do nothing
                 actionvec = np.append(actionvec,'N')
                 print('No Action')
+                time.sleep(5)
 
-            time.sleep(60)
+            time.sleep(55)
 
         except KeyboardInterrupt:
             print("Stopped by user.")
@@ -224,6 +222,3 @@ def SMA_tradingfunc(ticker,window):
         except Exception as e:
             print("Error:", e)
             time.sleep(60)
-
-
-    
