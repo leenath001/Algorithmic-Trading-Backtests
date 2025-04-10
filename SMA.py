@@ -142,11 +142,12 @@ def SMA_backtest(ticker,window,year):
     else:
         return yearly_data[year],text
 
-# Trading function
+# Trading function (add a vector that gets value)
 def SMA_tradingfunc(ticker,window):
     
     P = 0
     actionvec = []
+    valuevec = []
 
     ## setting up ib connection (id 1)
     ib = IB()
@@ -172,16 +173,22 @@ def SMA_tradingfunc(ticker,window):
             SMA = data['Open'].rolling(window).mean()
             delta = SMA - data['Open'] # SMA - data => capturing overvaluation, data - SMA => mean reversion 
             delta = delta.apply(is_pos)
+            
         
             # dataframe
             comb = pd.concat([data['Open'].round(2),SMA.round(2),delta],axis = 1)
             comb = comb.iloc[-10:,:]
+            comb.columns = ['Open','SMA','Signal']
             print()
             print(comb)
         
             # signal logic
             d1 = comb.iloc[-1,2]
             d2 = comb.iloc[-2,2]
+
+            curr_pr = yf.Ticker(ticker)
+            curr_pr = curr_pr.fast_info['last_price']
+            valuevec = np.append(valuevec,curr_pr)
     
             if P == 0 and d1 == False and d2 == True: #buy 
                 P = 1
@@ -189,12 +196,14 @@ def SMA_tradingfunc(ticker,window):
                 order = MarketOrder('BUY', 10)
                 actionvec = np.append(actionvec,'B')
                 trade = ib.placeOrder(contract, order)
+                valuevec = np.append(valuevec,curr_pr)
                 print('Buying')
                 time.sleep(5)
                 print("Order Status:", trade.orderStatus.status)
 
             elif P == 1 and d1 == False and d2 == False: # hold, account for slippage
                 actionvec = np.append(actionvec,'H')
+                valuevec = np.append(valuevec,curr_pr)
                 print('Holding')
                 time.sleep(5)
 
@@ -203,13 +212,15 @@ def SMA_tradingfunc(ticker,window):
                 contract = Stock(ticker, 'SMART', 'USD')
                 order = MarketOrder('SELL', 10)
                 actionvec = np.append(actionvec,'S')
+                valuevec = np.append(valuevec,curr_pr)
                 trade = ib.placeOrder(contract, order)
                 print('Selling')
                 time.sleep(5)
                 print("Order Status:", trade.orderStatus.status)
 
-            elif P == 0 and d1 == True and d2 == True: # do nothing
+            elif P == 0 and d1 == True and d2 == True or P == 0 and d1 == True and d2 == False or P == 0 and d1 == False and d2 == False: # do nothing
                 actionvec = np.append(actionvec,'N')
+                valuevec = np.append(valuevec,valuevec[0])
                 print('No Action')
                 time.sleep(5)
 
@@ -222,3 +233,10 @@ def SMA_tradingfunc(ticker,window):
         except Exception as e:
             print("Error:", e)
             time.sleep(60)
+    
+    # values returned
+    actionvec = pd.DataFrame(actionvec,columns=['Actions'])
+    valuevec = pd.DataFrame(valuevec,columns=['Values'])
+    ret = pd.concat([actionvec,valuevec])
+
+    return ret
