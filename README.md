@@ -1,7 +1,9 @@
 # Tools for algorithmic trading strategies 
 
-## SMA.SMA_backtest(ticker,window,year)
+## SMA.SMA_backtest(ticker,window,year,type)
 *  ALL ACTIONS OCCUR AT OPEN
+*  type :'mr' => mean reversion strat, aims to capture a securities movement back towards mean
+*  type :'ov' => overvaluation capture strat, aims to capture valuation above mean. Works better with shorter dated window 
 *  window gives period for rolling average to be calculated, year calls period of data wanted for backtest
 *  Buy condition: Buy first instance of SMA < equity price. Hold for all other instances following.
 *  Sell condition: Sell first instance of SMA > equity price. Do nothing for all other instances following.
@@ -9,7 +11,7 @@
 ## SMA.SMA_tradingfunc(ticker,window,type)
 *  function for employing SMA strategy using interactive brokers (IB) gateway
 *  'mr' => mean reversion strat, aims to capture a securities movement back towards mean
-*  'ov; => overvaluation capture strat, aims to capture valuation above mean. Works better with shorter dated window (3-5)
+*  'ov' => overvaluation capture strat, aims to capture valuation above mean. Works better with shorter dated window 
 *  window gives period for rolling average to be calculated
 *  can change interval through which function operates (eg. 1min or 1day, see lines 31-40, 159)
 *  function runs a while True loop. end with Ctrl + c
