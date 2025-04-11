@@ -20,7 +20,7 @@ def is_pos(n):
     return n > 0
 
 # Backtest function (ensure rules for bt and trade are the same, using same data)
-def SMA_backtest(ticker,window,year): 
+def SMA_backtest(ticker,window,year,type): 
 
     warnings.filterwarnings("ignore")
 
@@ -40,13 +40,17 @@ def SMA_backtest(ticker,window,year):
     '''
 
     # getting equity data, SMA data, and Boolean data (used to define when entry threshold crossed)
-    data = yf.download(ticker, period='3d', interval='1m',progress=False)
+    data = yf.download(ticker, period='2d', interval='1m',progress=False)
     SMA = data['Close'].rolling(window).mean().shift(1)
     open = data[['Open']]
     close = data[['Close']]
     SMA = SMA.iloc[window-1:]
-    delta = SMA - close                         # Truth vector, close - SMA -> mean reversion, SMA - close -> overvaluation capture 
-    delta = delta.apply(is_pos)
+    if type == 'ov':
+        delta = SMA - close                         # Truth vector, close - SMA -> mean reversion, SMA - close -> overvaluation capture 
+        delta = delta.apply(is_pos)
+    elif type == 'mr':
+        delta = close - SMA                         # Truth vector, close - SMA -> mean reversion, SMA - close -> overvaluation capture 
+        delta = delta.apply(is_pos)
     delta = pd.DataFrame(delta[window-1:])
     SMA = pd.DataFrame(SMA)
     open = open[window-1:]
