@@ -242,6 +242,7 @@ def SMA_tradingfunc(ticker,window,type):
                 time.sleep(5)
 
             bh = yf.Ticker(ticker).fast_info['last_price']
+            bhvec = np.append(bhvec,bh)
             
             time.sleep(55)
 
