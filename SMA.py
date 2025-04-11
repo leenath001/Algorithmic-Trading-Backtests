@@ -147,6 +147,8 @@ def SMA_backtest(ticker,window,year,type):
         return yearly_data[year],text
 
 # Trading function 
+#   for ov - we should change sell to SMA + 1.01 or 1.02 
+#   instead of waiting for SMA to catch up with current price, we try to sell at peak
 def SMA_tradingfunc(ticker,window,type):
     
     P = 0
@@ -154,6 +156,7 @@ def SMA_tradingfunc(ticker,window,type):
     curr_pr = yf.Ticker(ticker)
     curr_pr = curr_pr.fast_info['last_price']
     valuevec = [curr_pr]
+    bhvec = [curr_pr] 
     timevec = [pd.Timestamp.now(tz='US/Eastern')]
     bh = 1
 
@@ -253,7 +256,8 @@ def SMA_tradingfunc(ticker,window,type):
     # values returned
     actionvec = pd.DataFrame(actionvec,columns=['Actions'])
     valuevec = pd.DataFrame(valuevec,columns=['Values'])
-    ret = pd.concat([actionvec,valuevec.round(2)],axis = 1)
+    bhvec = pd.DataFrame(bhvec,columns=['Buy/Hold'])
+    ret = pd.concat([actionvec,valuevec.round(2),bhvec.round(2)],axis = 1)
     ret.index = pd.to_datetime(timevec)
     ret.index.name = 'Timestamp'
 
@@ -268,5 +272,26 @@ def SMA_tradingfunc(ticker,window,type):
         'Buy/Hold Growth : {}%'.format(bhpctg.round(2)),
         '                  '
     ))
+
+    plt.figure()
+    plt.plot(ret.index,ret.loc[:,"Values"],label = 'Strategy',color = 'green')
+    plt.plot(ret.index,ret.loc[:,'Buy/Hold'],label = "Close",color = 'orange')
+    plt.xlabel("Timestamp")
+
+    buy_dates = ret[ret["Actions"] == "B"].index
+
+    for date in buy_dates:
+        plt.scatter(x=date, y=ret.loc[date, 'Values'], color='lime', marker='v', s=7,zorder= 2)
+
+    sell_dates = ret[ret["Actions"] == "S"].index
+
+    for date in sell_dates:
+        plt.scatter(x=date, y=ret.loc[date, 'Values'], color='red', marker='v', s=7,zorder= 2)
+
+    plt.ylabel("Value")
+    plt.xticks(rotation=30)
+    plt.legend()
+    plt.title("Strategy vs Buy & Hold : {} (S0 = {})".format(ticker,curr_pr))
+    plt.show()
 
     return ret,text
