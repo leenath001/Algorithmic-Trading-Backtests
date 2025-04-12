@@ -257,6 +257,9 @@ def SMA_tradingfunc(ticker,window,type):
             print("Error:", e)
             time.sleep(60)
     
+    # beta of strategy vs specific asset movement
+    beta = np.cov(valuevec,bhvec)/np.var(bhvec)
+
     # values returned
     actionvec = pd.DataFrame(actionvec,columns=['Actions'])
     valuevec = pd.DataFrame(valuevec,columns=['Values'])
@@ -268,12 +271,18 @@ def SMA_tradingfunc(ticker,window,type):
     pctg = (ret.iloc[len(ret)-1,1]-ret.iloc[0,1])/ret.iloc[0,1] * 100
     bhpctg = (ret.iloc[len(ret)-1,2]-ret.iloc[0,2])/ret.iloc[0,2] * 100
 
+    risk_free = .0422 # adjust as needed
+    # alpha of strategy vs specific asset
+    alpha = pctg - [risk_free + beta * (bhpctg - risk_free)]
+
     text = '\n'.join((
         '                  ',
         'Trading Periods : {}'.format(len(ret)),
         'P&L : ${}'.format((ret.iloc[len(ret)-1,1]- ret.iloc[0,1]).round(2)),
         'Growth : {}%'.format(pctg.round(2)),
         'Buy/Hold Growth : {}%'.format(bhpctg.round(2)),
+        'Beta (asset-relative) : {}'.format(beta.round(2)),
+        'Alpha (asset-relative) : {}%'.format(round(alpha,2) * 100),
         '                  '
     ))
 
