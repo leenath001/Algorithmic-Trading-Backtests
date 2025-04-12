@@ -147,9 +147,6 @@ def SMA_backtest(ticker,window,year,type):
         return yearly_data[year],text
 
 # Trading function 
-#   for ov - we should change sell to SMA + 1.01 or 1.02 
-#   instead of waiting for SMA to catch up with current price, we try to sell at peak 
-#   validate valuevec working properly
 def SMA_tradingfunc(ticker,window,type):
     
     P = 0
