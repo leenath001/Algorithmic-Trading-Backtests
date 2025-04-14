@@ -272,6 +272,7 @@ def SMA_tradingfunc(ticker,window,type):
     
     # beta of strategy vs specific asset movement
     beta = np.cov(valuevec,bhvec)/np.var(bhvec)
+    beta = beta[1,1]
 
     # values returned
     actionvec = pd.DataFrame(actionvec,columns=['Actions'])
