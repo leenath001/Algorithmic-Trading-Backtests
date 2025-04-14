@@ -295,7 +295,7 @@ def SMA_tradingfunc(ticker,window,type):
         'Growth : {}%'.format(pctg.round(2)),
         'Buy/Hold Growth : {}%'.format(bhpctg.round(2)),
         'Beta (asset-relative) : {}'.format(beta.round(2)),
-        'Alpha (asset-relative) : {}%'.format(round(alpha,2) * 100),
+        'Alpha (asset-relative) : {}%'.format(np.round(alpha,2) * 100),
         '                  '
     ))
 
