@@ -182,7 +182,7 @@ def SMA_tradingfunc(ticker,window,type):
             # loop to handle exception if data empty/not long enough
             if data.empty or len(data) < window + 2:
                 print("Not enough data yet...")
-                time.sleep(60)
+                time.sleep(20)
                 continue
 
             # compute SMA
@@ -250,7 +250,7 @@ def SMA_tradingfunc(ticker,window,type):
             bh = yf.Ticker(ticker).fast_info['last_price']
             bhvec = np.append(bhvec,bh)
             
-            time.sleep(55)
+            time.sleep(15)
 
         except KeyboardInterrupt:
 
@@ -268,7 +268,7 @@ def SMA_tradingfunc(ticker,window,type):
 
         except Exception as e:
             print("Error:", e)
-            time.sleep(60)
+            time.sleep(20)
     
     # beta of strategy vs specific asset movement
     beta = np.cov(valuevec,bhvec)/np.var(bhvec)
@@ -288,6 +288,7 @@ def SMA_tradingfunc(ticker,window,type):
     risk_free = .0422 # adjust as needed
     # alpha of strategy vs specific asset
     alpha = pctg - [risk_free + beta * (bhpctg - risk_free)]
+    alpha = alpha[0]
 
     text = '\n'.join((
         '                  ',
@@ -296,7 +297,7 @@ def SMA_tradingfunc(ticker,window,type):
         'Growth : {}%'.format(pctg.round(2)),
         'Buy/Hold Growth : {}%'.format(bhpctg.round(2)),
         'Beta (asset-relative) : {}'.format(beta.round(2)),
-        'Alpha (asset-relative) : {}%'.format(np.round(alpha,2) * 100),
+        'Alpha (asset-relative) : {}%'.format(np.round(alpha*100,2)),
         '                  '
     ))
 
@@ -305,6 +306,7 @@ def SMA_tradingfunc(ticker,window,type):
     plt.plot(ret.index,ret.loc[:,'Buy/Hold'],label = "Close",color = 'orange')
     plt.xlabel("Timestamp")
 
+    '''
     buy_dates = ret[ret["Actions"] == "B"].index
 
     for date in buy_dates:
@@ -314,11 +316,12 @@ def SMA_tradingfunc(ticker,window,type):
 
     for date in sell_dates:
         plt.scatter(x=date, y=ret.loc[date, 'Values'], color='red', marker='v', s=7,zorder= 2)
+    '''
 
     plt.ylabel("Value")
     plt.xticks(rotation=30)
     plt.legend()
-    plt.title("Strategy vs Buy & Hold : {} (S0 = {})".format(ticker,curr_pr))
+    plt.title("Strategy vs Buy & Hold : {} (S0 = {})".format(ticker,np.round(curr_pr,2)))
     plt.show()
 
     return ret,text
