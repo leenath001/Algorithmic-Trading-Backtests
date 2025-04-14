@@ -164,6 +164,7 @@ def SMA_tradingfunc(ticker,window,type):
     timevec = [pd.Timestamp.now(tz='US/Eastern')]
     bh = 1
     entry = 1
+    newhold = 1
 
     ## setting up ib connection (id 1)
     ib = IB()
@@ -212,9 +213,9 @@ def SMA_tradingfunc(ticker,window,type):
                 P = 1
                 contract = Stock(ticker, 'SMART', 'USD')
                 order = MarketOrder('BUY', 10)
+                trade = ib.placeOrder(contract, order)
                 entry = curr_pr
                 actionvec = np.append(actionvec,'B')
-                trade = ib.placeOrder(contract, order)
                 valuevec = np.append(valuevec,valuevec[-1]) 
                 timevec.append(data.index[-1])
                 print('Buying')
@@ -222,9 +223,15 @@ def SMA_tradingfunc(ticker,window,type):
                 print("Order Status:", trade.orderStatus.status)
 
             elif P == 1 and d1 == False: # and d2 == False or P == 1 and d1 == False and d2 == True: # hold, account for slippage
+                if actionvec[-1] == 'B':
+                    valuevec = np.append(valuevec,valuevec[-1] * curr_pr/entry) 
+                    timevec.append(data.index[-1])
+                    newhold = curr_pr
+                elif actionvec[-1] == 'H':
+                    valuevec = np.append(valuevec,valuevec[-1] * curr_pr/newhold)
+                    timevec.append(data.index[-1])
+                    newhold = curr_pr
                 actionvec = np.append(actionvec,'H')
-                valuevec = np.append(valuevec,valuevec[-1] * curr_pr/entry)  
-                timevec.append(data.index[-1])
                 print('Holding')
                 time.sleep(5)
 
@@ -232,17 +239,20 @@ def SMA_tradingfunc(ticker,window,type):
                 P = 0
                 contract = Stock(ticker, 'SMART', 'USD')
                 order = MarketOrder('SELL', 10)
-                actionvec = np.append(actionvec,'S')
-                valuevec = np.append(valuevec,valuevec[-1] * curr_pr/entry)
-                timevec.append(data.index[-1])
                 trade = ib.placeOrder(contract, order)
+                if actionvec[-1] == 'B':
+                    valuevec = np.append(valuevec,valuevec[-1] * curr_pr/entry) 
+                elif actionvec[-1] == 'H':
+                    valuevec = np.append(valuevec,valuevec[-1] * curr_pr/newhold) 
+                timevec.append(data.index[-1])
+                actionvec = np.append(actionvec,'S')
                 print('Selling')
                 time.sleep(5)
                 print("Order Status:", trade.orderStatus.status)
 
             elif P == 0 and d1 == True or P == 0 and d1 == d2 == False: # and d2 == True or P == 0 and d1 == True and d2 == False or P == 0 and d1 == False and d2 == False: # do nothing
                 actionvec = np.append(actionvec,'N')
-                valuevec = np.append(valuevec,valuevec[-1]) # this is good.
+                valuevec = np.append(valuevec,valuevec[-1]) 
                 timevec.append(data.index[-1])
                 print('No Action')
                 time.sleep(5)
