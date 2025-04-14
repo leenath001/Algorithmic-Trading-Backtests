@@ -40,7 +40,7 @@ def SMA_backtest(ticker,window,year,type):
     '''
 
     # getting equity data, SMA data, and Boolean data (used to define when entry threshold crossed)
-    data = yf.download(ticker, period='2d', interval='1m',progress=False)
+    data = yf.download(ticker, period='7d', interval = '5m',progress=False)
     SMA = data['Close'].rolling(window).mean().shift(1)
     open = data[['Open']]
     close = data[['Close']]
@@ -115,7 +115,7 @@ def SMA_backtest(ticker,window,year,type):
         #plt.axvline(x = shifted_date,color='red')
         #plt.scatter(x=date, y=close.loc[date] , color='red', marker='s', s=7,zorder= 2)
         plt.scatter(x=date, y=comb.loc[date, 'Strat Val'], color='red', marker='v', s=7,zorder= 2)
-
+    
     plt.ylabel("Value")
     plt.xticks(rotation=30)
     plt.legend()
@@ -125,11 +125,16 @@ def SMA_backtest(ticker,window,year,type):
     pctg = (comb.iloc[len(comb)-1,4]-alo)/alo * 100
     bhpctg = (comb.iloc[len(comb)-1,1]-comb.iloc[0,0])/comb.iloc[0,0] * 100
 
+    risk_free = .0422 # adjust as needed
+    # alpha of strategy vs specific asset
+
     text = '\n'.join((
+        '                  ',
         'Trading Periods : {}'.format(len(comb)),
         'P&L : ${}'.format((comb.iloc[len(comb)-1,4]- alo).round(2)),
         'Growth : {}%'.format(pctg.round(2)),
-        'Buy/Hold Growth : {}%'.format(bhpctg.round(2))
+        'Buy/Hold Growth : {}%'.format(bhpctg.round(2)),
+        '                  '
     ))
 
     def slice_by_year(df):
@@ -147,6 +152,7 @@ def SMA_backtest(ticker,window,year,type):
         return yearly_data[year],text
 
 # Trading function 
+#   for ov - we should change sell to SMA + 1.01 or 1.02, instead of waiting for SMA to catch up with current price, we try to sell at peak 
 def SMA_tradingfunc(ticker,window,type):
     
     P = 0
@@ -247,6 +253,16 @@ def SMA_tradingfunc(ticker,window,type):
             time.sleep(55)
 
         except KeyboardInterrupt:
+
+            if P == 1: 
+                contract = Stock(ticker, 'SMART', 'USD')
+                order = MarketOrder('SELL', 10)
+                trade = ib.placeOrder(contract, order)
+                actionvec = np.append(actionvec,'S')
+                valuevec = np.append(valuevec,valuevec[-1] * curr_pr/entry)
+                timevec.append(data.index[-1])
+                print("Order Status:", trade.orderStatus.status)
+                
             print("Stopped by user.")
             break
 
