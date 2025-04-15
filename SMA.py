@@ -208,6 +208,8 @@ def SMA_tradingfunc(ticker,window,type):
 
             curr_pr = yf.Ticker(ticker)
             curr_pr = curr_pr.fast_info['last_price']
+            bh = yf.Ticker(ticker).fast_info['last_price']
+            bhvec = np.append(bhvec,bh)
 
             if P == 0 and d1 == False and d2 == True: #buy 
                 P = 1
@@ -256,9 +258,6 @@ def SMA_tradingfunc(ticker,window,type):
                 timevec.append(data.index[-1])
                 print('No Action')
                 time.sleep(5)
-
-            bh = yf.Ticker(ticker).fast_info['last_price']
-            bhvec = np.append(bhvec,bh)
             
             time.sleep(15)
 
@@ -268,10 +267,12 @@ def SMA_tradingfunc(ticker,window,type):
                 contract = Stock(ticker, 'SMART', 'USD')
                 order = MarketOrder('SELL', 10)
                 trade = ib.placeOrder(contract, order)
-                actionvec = np.append(actionvec,'S')
-                valuevec = np.append(valuevec,valuevec[-1] * curr_pr/entry)
+                if actionvec[-1] == 'B':
+                    valuevec = np.append(valuevec,valuevec[-1] * curr_pr/entry) 
+                elif actionvec[-1] == 'H':
+                    valuevec = np.append(valuevec,valuevec[-1] * curr_pr/newhold) 
                 timevec.append(data.index[-1])
-                print("Order Status:", trade.orderStatus.status)
+                actionvec = np.append(actionvec,'S')
                 
             print("Stopped by user.")
             break
