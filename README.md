@@ -1,7 +1,7 @@
 # Tools for algorithmic trading strategies 
 
 *  To run tradingfuncs, create an interactive brokers account and download IB Gateway (API must be running simultaneously with the function). Can run functions in any terminal.
-*  If you'd like to run the tradingfuncs autonomously, for mac download 'Amphetamine' on app store. Processes will run in the background while laptop/computer is inactive. Also, employ caffeinate -i python3 '{filepath}' to run within terminal. Trading functions run until Ctrl + C is used.
+*  If you'd like to run the tradingfuncs autonomously, for mac download 'Amphetamine' on app store. Processes will run in the background while laptop/computer is inactive. Also, employ caffeinate -i python3 '{filepath of execution files}' to run within terminal. Trading functions run until Ctrl + C is used.
 
 ## SMA_strat.SMA_backtest(ticker,window,year,type)
 *  ALL ACTIONS OCCUR AT OPEN
