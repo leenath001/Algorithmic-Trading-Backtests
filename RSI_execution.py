@@ -3,13 +3,7 @@ import yfinance as yf
 
 # terminal func to run while in clamshell, ensure amphetaime is on
 
-# macair
-# caffeinate -i python3 "/Users/leenath/Library/Mobile Documents/com~apple~CloudDocs/Desktop/Code/Algos/RSI_execution.py"
-
-# macmini
-# caffeinate -i python3 "/Users/nlee/Library/Mobile Documents/com~apple~CloudDocs/Desktop/Code/Algos/RSI_execution.py"
-
-# Other strats : continual put, scalp, pair trading, arbitrage? 
+# caffeinate -i python3 "{filepath}"
 
 ''' INVERVAL PARAMETERS
     "1m" Max 7 days, only for recent data
