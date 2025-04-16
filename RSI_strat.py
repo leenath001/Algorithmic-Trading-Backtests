@@ -6,14 +6,6 @@ import Indicators as I
 import matplotlib.pyplot as plt
 import warnings
 from ib_insync import *
-import timeimport Data_Funcs as df
-import yfinance as yf
-import pandas as pd
-import numpy as np
-import Indicators as I
-import matplotlib.pyplot as plt
-import warnings
-from ib_insync import *
 import time
 
 ## Test how RSI strategy performs against buy/hold
