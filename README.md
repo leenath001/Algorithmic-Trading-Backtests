@@ -1,6 +1,6 @@
 # Tools for algorithmic trading strategies 
 
-## SMA.SMA_backtest(ticker,window,year,type)
+## SMA_strat.SMA_backtest(ticker,window,year,type)
 *  ALL ACTIONS OCCUR AT OPEN
 *  type :'mr' => mean reversion strat, aims to capture a securities movement back towards mean
 *  type :'ov' => overvaluation capture strat, aims to capture valuation above mean. Works better with shorter dated window 
@@ -8,7 +8,7 @@
 *  Buy condition: Buy first instance of SMA < equity price. Hold for all other instances following.
 *  Sell condition: Sell first instance of SMA > equity price. Do nothing for all other instances following.
 
-## SMA.SMA_tradingfunc(ticker,window,type)
+## SMA_strat.SMA_tradingfunc(ticker,window,type)
 *  function for employing SMA strategy using interactive brokers (IB) gateway
 *  'mr' => mean reversion strat, aims to capture a securities movement back towards mean
 *  'ov' => overvaluation capture strat, aims to capture valuation above mean. Works better with shorter dated window 
@@ -16,11 +16,16 @@
 *  can change interval through which function operates (eg. 1min or 1day, see lines 31-40, 159)
 *  function runs a while True loop. end with Ctrl + c
 
-## RSI_breakout_bt.RSI_breakout(ticker,window,year)
+## RSI_strat.RSI_breakout(ticker,window,year)
 *  ALL ACTIONS OCCUR AT OPEN
 *  window gives period for RSI to be calculated, year calls period of data wanted for backtest
 *  Buy condition: Buy first instance that RSI < 70. Hold for all other instances following.
 *  Sell conditon: Sell first instance that RSI > 70. Do nothing for all other instances following.
+
+## RSI_strat.RSI_tradingfunc(ticker,window)
+*  function for employing SMA strategy using interactive brokers (IB) gateway
+*  window gives period for RSI to be calculated (per minute basis, testing with 9periods in [9-14])
+*  function runs a while True loop. end with Ctrl + c
 
 ## Indicators.simple_moving_average(ticker,period)
 *  Takes inputs ticker (str) and a period (no of days) to return a simple moving average over the specified period. 
