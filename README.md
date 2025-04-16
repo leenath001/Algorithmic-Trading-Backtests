@@ -1,5 +1,8 @@
 # Tools for algorithmic trading strategies 
 
+*  To run tradingfuncs, create an interactive brokers account and download IB Gateway (API must be running simultaneously with the function). Can run functions in any terminal.
+*  If you'd like to run the tradingfuncs autonomously, for mac download 'Amphetamine' on app store. Processes will run in the background while laptop/computer is inactive. Also, employ caffeinate -i python3 '{filepath}' to run within terminal. Trading functions run until Ctrl + C is used.
+
 ## SMA_strat.SMA_backtest(ticker,window,year,type)
 *  ALL ACTIONS OCCUR AT OPEN
 *  type :'mr' => mean reversion strat, aims to capture a securities movement back towards mean
@@ -23,7 +26,7 @@
 *  Sell conditon: Sell first instance that RSI > 70. Do nothing for all other instances following.
 
 ## RSI_strat.RSI_tradingfunc(ticker,window)
-*  function for employing SMA strategy using interactive brokers (IB) gateway
+*  function for employing SMA strategy using interactive brokers (IB) gateway, must download/import indicators file into execution script 
 *  window gives period for RSI to be calculated (per minute basis, testing with 9periods in [9-14])
 *  function runs a while True loop. end with Ctrl + c
 
