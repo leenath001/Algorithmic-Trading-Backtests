@@ -162,17 +162,18 @@ def RSI_breakout_backtest(ticker,window,year):
     else:
         return yearly_data[year],text
     
-# we grab an initial RSI based on current periods 
 def RSI_tradingfunc(ticker,window):
     
     # initializing variables to be used
     P = 0
     entry = 1
     newhold = 1
-    valuevec = []
-    actionvec = []
-    bhvec = []
-    RSIvec = []
+    curr = yf.Ticker(ticker)
+    curr = curr.fast_info['last_price']
+    valuevec = [curr]
+    actionvec = ['N']
+    bhvec = [curr]
+    RSIvec = [I.RSI(ticker,window)]
     timevec = [pd.Timestamp.now(tz='US/Eastern')]
 
     # set up IB connection out of loop (id 2)
@@ -196,14 +197,16 @@ def RSI_tradingfunc(ticker,window):
 
             # compute RSI
             RSI_now = I.RSI(ticker,window)
+            RSI_again = I.RSI(ticker,window)
 
             # build 1row dataframe, signal logic to call from 
-            open = data['Open']
-            close = data['Close']
-            RSI = [RSI_now]
-            RSI = pd.DataFrame(RSI, index=open.index)
-            frame = pd.concat([open.round(2),close.round(2),RSI.round(2)],axis=1)
+            open = data['Open'].iloc[-1,:]
+            close = data['Close'].iloc[-1,:]
+            RSI_now = pd.DataFrame([RSI_now],index = open.index)
+            frame = pd.concat([open,close,RSI_now],axis=1)
             frame.columns = ['Open','Close','RSI']
+            print()
+            print(frame.round(2))
 
             # update current price/buyhold vec
             curr = yf.Ticker(ticker)
@@ -211,7 +214,7 @@ def RSI_tradingfunc(ticker,window):
             bhvec = np.append(bhvec,np.round(curr,2))
 
             # order/trading logic, need to update valuevec, actionvec, timevec, and RSIvec within each iteration
-            if P == 0 and frame.iloc[0,2] < 70: # buy
+            if P == 0 and RSI_again <= 30: # buy
                 P = 1
                 contract = Stock(ticker, 'SMART', 'USD')
                 order = MarketOrder('BUY', 10)
@@ -225,7 +228,7 @@ def RSI_tradingfunc(ticker,window):
                 time.sleep(5)
                 print("Order Status:", trade.orderStatus.status)
 
-            elif P == 1 and frame.iloc[0,2] > 30: # hold
+            elif P == 1 and RSI_again < 70: # hold
                 # conditional loop to handle accurate tracking 
                 if actionvec[-1] == 'B':
                     valuevec = np.append(valuevec,valuevec[-1] * curr/entry) 
@@ -240,7 +243,7 @@ def RSI_tradingfunc(ticker,window):
                 print('Holding')
                 time.sleep(5)
 
-            elif P == 1 and frame.iloc[0,2] <= 30: # sell
+            elif P == 1 and RSI_again >= 70: # sell
                 P = 0
                 contract = Stock(ticker, 'SMART', 'USD')
                 order = MarketOrder('SELL', 10)
@@ -256,7 +259,7 @@ def RSI_tradingfunc(ticker,window):
                 time.sleep(5)
                 print("Order Status:", trade.orderStatus.status)
 
-            elif P == 0 and frame.iloc[0,2] >= 70: # no action
+            elif P == 0 and RSI_again > 30: # no action
                 actionvec = np.append(actionvec,'N')
                 valuevec = np.append(valuevec,valuevec[-1]) 
                 timevec.append(data.index[-1])
@@ -264,7 +267,7 @@ def RSI_tradingfunc(ticker,window):
                 print('No Action')
                 time.sleep(5)
 
-            time.sleep(15)
+            time.sleep(55)
 
         # keyboard interrupt exception to sell off
         except KeyboardInterrupt:
@@ -288,7 +291,7 @@ def RSI_tradingfunc(ticker,window):
         # error exception
         except Exception as e:
             print("Error:", e)
-            time.sleep(20)
+            time.sleep(60)
 
     # trading stats, plotting functions
     beta = np.cov(valuevec,bhvec)/np.var(bhvec)
@@ -298,8 +301,8 @@ def RSI_tradingfunc(ticker,window):
     actionvec = pd.DataFrame(actionvec,columns=['Actions'])
     valuevec = pd.DataFrame(valuevec,columns=['Values'])
     bhvec = pd.DataFrame(bhvec,columns=['Buy/Hold'])
-    RSIvec = pd.DataFrame(bhvec,columns=['RSI'])
-    ret = pd.concat([RSIvec,actionvec,valuevec.round(2),bhvec.round(2)],axis = 1)
+    RSIvec = pd.DataFrame(RSIvec,columns=['RSI'])
+    ret = pd.concat([RSIvec.round(2),actionvec,valuevec.round(2),bhvec.round(2)],axis = 1)
     ret.index = pd.to_datetime(timevec)
     ret.index.name = 'Timestamp'
 
@@ -343,7 +346,7 @@ def RSI_tradingfunc(ticker,window):
     plt.ylabel("Value")
     plt.xticks(rotation=30)
     plt.legend()
-    plt.title("Strategy vs Buy & Hold : {} (S = {})".format(ticker,ret[0,3].round(2)))
+    plt.title("Strategy vs Buy & Hold : {} (S = {})".format(ticker,ret.iloc[0,3].round(2)))
     plt.show()
 
     return ret,text
