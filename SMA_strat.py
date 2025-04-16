@@ -211,10 +211,9 @@ def RSI_tradingfunc(ticker,window):
             # update current price/buyhold vec
             curr = yf.Ticker(ticker)
             curr = curr.fast_info['last_price']
-            bhvec = np.append(bhvec,np.round(curr,2))
 
             # order/trading logic, need to update valuevec, actionvec, timevec, and RSIvec within each iteration
-            if P == 0 and RSI_again < 70: # buy
+            if P == 0 and RSI_again <= 30: # buy
                 P = 1
                 contract = Stock(ticker, 'SMART', 'USD')
                 order = MarketOrder('BUY', 10)
@@ -224,11 +223,12 @@ def RSI_tradingfunc(ticker,window):
                 valuevec = np.append(valuevec,valuevec[-1]) 
                 timevec.append(data.index[-1])
                 RSIvec = np.append(RSIvec,frame.iloc[0,2].round(2))
+                bhvec = np.append(bhvec,np.round(curr,2))
                 print('Buying')
                 time.sleep(5)
                 print("Order Status:", trade.orderStatus.status)
 
-            elif P == 1 and RSI_again > 30: # hold
+            elif P == 1 and RSI_again < 70: # hold
                 # conditional loop to handle accurate tracking 
                 if actionvec[-1] == 'B':
                     valuevec = np.append(valuevec,valuevec[-1] * curr/entry) 
@@ -240,10 +240,11 @@ def RSI_tradingfunc(ticker,window):
                     newhold = curr
                 actionvec = np.append(actionvec,'H')
                 RSIvec = np.append(RSIvec,frame.iloc[0,2].round(2))
+                bhvec = np.append(bhvec,np.round(curr,2))
                 print('Holding')
                 time.sleep(5)
 
-            elif P == 1 and RSI_again <= 30: # sell
+            elif P == 1 and RSI_again >= 70: # sell
                 P = 0
                 contract = Stock(ticker, 'SMART', 'USD')
                 order = MarketOrder('SELL', 10)
@@ -255,15 +256,17 @@ def RSI_tradingfunc(ticker,window):
                 timevec.append(data.index[-1])
                 actionvec = np.append(actionvec,'S')
                 RSIvec = np.append(RSIvec,frame.iloc[0,2].round(2))
+                bhvec = np.append(bhvec,np.round(curr,2))
                 print('Selling')
                 time.sleep(5)
                 print("Order Status:", trade.orderStatus.status)
 
-            elif P == 0 and RSI_again >= 70: # no action
+            elif P == 0 and RSI_again > 30: # no action
                 actionvec = np.append(actionvec,'N')
                 valuevec = np.append(valuevec,valuevec[-1]) 
                 timevec.append(data.index[-1])
                 RSIvec = np.append(RSIvec,frame.iloc[0,2].round(2))
+                bhvec = np.append(bhvec,np.round(curr,2))
                 print('No Action')
                 time.sleep(5)
 
