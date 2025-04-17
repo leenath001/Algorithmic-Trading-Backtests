@@ -238,7 +238,7 @@ def SMA_tradingfunc(ticker,window,type):
                 print('Holding')
                 time.sleep(5)
 
-            elif P == 1 and d1 == True: #and d2 == False or P == 1 and d1 == d2 == True: # sell @ open
+            elif P == 1 and d1 == True or P == 1 and curr_pr/entry >= 1.02: #and d2 == False or P == 1 and d1 == d2 == True: # sell @ open
                 P = 0
                 contract = Stock(ticker, 'SMART', 'USD')
                 order = MarketOrder('SELL', 10)
