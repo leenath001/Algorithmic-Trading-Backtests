@@ -1,4 +1,3 @@
-import Data_Funcs as df
 import yfinance as yf
 import pandas as pd
 import numpy as np
@@ -310,7 +309,7 @@ def SMA_tradingfunc(ticker,window,type):
 
     text = '\n'.join((
         '                  ',
-        'Asset : {}'.format(ticker),
+        'Asset & Strategy : {}, {}'.format(ticker,type),
         'Trading Periods : {}'.format(len(ret)),
         #'P&L : ${}'.format((ret.iloc[len(ret)-1,1]- ret.iloc[0,1]).round(2)),
         'Growth : {}%'.format(pctg.round(2)),
