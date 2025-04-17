@@ -268,17 +268,20 @@ def SMA_tradingfunc(ticker,window,type):
         except KeyboardInterrupt:
 
             if P == 1: 
+                curr_pr = yf.Ticker(ticker)
+                curr_pr = curr_pr.fast_info['last_price']
                 contract = Stock(ticker, 'SMART', 'USD')
                 order = MarketOrder('SELL', 10)
                 trade = ib.placeOrder(contract, order)
                 if actionvec[-1] == 'B':
                     valuevec = np.append(valuevec,valuevec[-1] * curr_pr/entry) 
                 elif actionvec[-1] == 'H':
-                    valuevec = np.append(valuevec,valuevec[-1] * curr_pr/newhold) # error not sure if values are being loaded correctly, could also be an issue of when i closed it
+                    valuevec = np.append(valuevec,valuevec[-1] * curr_pr/newhold) 
                 timevec.append(data.index[-1])
                 actionvec = np.append(actionvec,'S')
+                bhvec = np.append(bhvec,curr_pr)
                 
-            print("Stopped by user.")
+            print("  Stopped by user.")
             break
 
         except Exception as e:
