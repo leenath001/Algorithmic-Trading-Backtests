@@ -1,4 +1,3 @@
-import Data_Funcs as df
 import yfinance as yf
 import pandas as pd
 import numpy as np
@@ -279,6 +278,8 @@ def RSI_tradingfunc(ticker,window):
                 contract = Stock(ticker, 'SMART', 'USD')
                 order = MarketOrder('SELL', 10)
                 trade = ib.placeOrder(contract, order)
+                curr = yf.Ticker(ticker)
+                curr = curr.fast_info['last_price']
                 if actionvec[-1] == 'B':
                     valuevec = np.append(valuevec,valuevec[-1] * curr/entry) 
                 elif actionvec[-1] == 'H':
@@ -287,6 +288,7 @@ def RSI_tradingfunc(ticker,window):
                 actionvec = np.append(actionvec,'S')
                 RSI_now = I.RSI(ticker,window)
                 RSIvec = np.append(RSIvec,np.round(RSI_now,2))
+                bhvec = np.append(bhvec,np.round(curr,2))
                 
             print("Stopped by user.")
             break
@@ -353,4 +355,3 @@ def RSI_tradingfunc(ticker,window):
     plt.show()
 
     return ret,text
-
