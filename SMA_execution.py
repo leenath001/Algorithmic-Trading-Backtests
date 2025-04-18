@@ -9,6 +9,10 @@ import yfinance as yf
 # (TSLA,9)
 
 x = SMA_functions.SMA_tradingfunc('SPY',4,'mr')
+
+history = x[0]
+stats = x[1]
+
 print()
-print(x[0])
-print(x[1])
+print(history)
+print(stats)
