@@ -19,6 +19,9 @@ import yfinance as yf
 # (UAMY,8)
 
 x = RSI.RSI_tradingfunc('SPY',9)
+history = x[0]
+stats = x[1]
+
 print()
-print(x[0])
-print(x[1])
+print(history)
+print(stats)
