@@ -197,7 +197,7 @@ def SMA_tradingfunc(ticker,window,type):
         
             # dataframe
             comb = pd.concat([data['Open'].round(2),SMA.round(2),delta],axis = 1)
-            comb = comb.iloc[-10:,:]
+            comb = comb.iloc[-2:,:]
             comb.columns = ['Open','SMA','Signal']
             print()
             print(comb)
