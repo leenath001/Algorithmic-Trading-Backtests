@@ -26,7 +26,7 @@ def Scalping_tradingfunc(ticker):
         
     # set up IB connection out of loop (id 2)
     ib = IB()
-    ib.connect('127.0.0.1', 4002, clientId=2)
+    ib.connect('127.0.0.1', 4002, clientId=3)
 
     # dataframe initialization
     actionvec = ['N']
