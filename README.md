@@ -30,6 +30,12 @@
 *  window gives period for RSI to be calculated (per minute basis, testing with 9periods in [9-14])
 *  function runs a while True loop. end with Ctrl + c
 
+## Scalping_funcs.Scalping_tradingfunc(ticker) (to be tested next market session)
+*  function for employing scalping strategy using IB gateway.
+*  Strategy continuously pings yfin API to grab current price and determines if current is > last. Strategy aims to profit on uptrends, while staying on the sideline for downtrends.
+*  Buy condition: Buy if most recent quote (x) is greater than one before (x-1). Hold for all other instances following.
+*  Sell conditon: Sell if most recent quote (x) is less than one before (x-1). Do nothing for all other instances following.
+
 ## Indicators.simple_moving_average(ticker,period)
 *  Takes inputs ticker (str) and a period (no of days) to return a simple moving average over the specified period. 
 
@@ -47,4 +53,4 @@
 *  Returns RSI score at open based on previous 14 trading sessions.
 *  Typically, RSI < 30 -> oversold, RSI < 70 -> overbought
 
-Currently working on scalping, continual put, pair trading strats (along with implementation)
+Currently working on continual put, pair trading strats (along with implementation)
