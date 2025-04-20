@@ -26,7 +26,8 @@
 *  Sell conditon: Sell first instance that RSI > 70. Do nothing for all other instances following.
 
 ## RSI_funcs.RSI_tradingfunc(ticker,window)
-*  function for employing SMA strategy using interactive brokers (IB) gateway, must download/import indicators file into execution script 
+*  function for employing SMA strategy using interactive brokers (IB) gateway, must download/import indicators file into execution script
+*  stratefy employs RSI indicator to determine whether a security is overbought/oversold. typically, RSI < 30 implies oversold while > 70 implies overbought. 
 *  window gives period for RSI to be calculated (per minute basis, testing with 9periods in [9-14])
 *  function runs a while True loop. end with Ctrl + c
 
