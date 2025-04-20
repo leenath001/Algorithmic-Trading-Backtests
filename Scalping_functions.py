@@ -24,7 +24,7 @@ def Scalping_tradingfunc(ticker):
     curr_pr = yf.Ticker(ticker)
     curr_pr = curr_pr.fast_info['last_price']
         
-    # set up IB connection out of loop (id 2)
+    # set up IB connection out of loop (id 3)
     ib = IB()
     ib.connect('127.0.0.1', 4002, clientId=3)
 
@@ -127,7 +127,7 @@ def Scalping_tradingfunc(ticker):
                 timevec = np.append(timevec,pd.Timestamp.now(tz='US/Eastern'))
                 actionvec = np.append(actionvec,'N')
                 bhvec = np.append(bhvec,curr)
-                truths = np.append(truths,"NA")
+                truths = np.append(truths,"T")
                 
             print(" Stopped by user.")
             break
