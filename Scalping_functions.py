@@ -127,7 +127,7 @@ def Scalping_tradingfunc(ticker):
                 timevec = np.append(timevec,pd.Timestamp.now(tz='US/Eastern'))
                 actionvec = np.append(actionvec,'N')
                 bhvec = np.append(bhvec,curr)
-                truths = np.append(truths,truth)
+                truths = np.append(truths,"NA")
                 
             print(" Stopped by user.")
             break
