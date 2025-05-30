@@ -1,6 +1,6 @@
 # Tools for algorithmic trading strategies 
 
-See strategy-specific repositiries for trading functions and backtesting functions.
+See strategy-specific repositiries for granular explanation of trading functions and backtesting functions.
 
 ## Indicators.simple_moving_average(ticker,period)
 *  Takes inputs ticker (str) and a period (no of days) to return a simple moving average over the specified period. 
@@ -18,3 +18,7 @@ See strategy-specific repositiries for trading functions and backtesting functio
 ## Indicators.RSI(ticker)
 *  Returns RSI score at open based on previous 14 trading sessions.
 *  Typically, RSI < 30 -> oversold, RSI < 70 -> overbought
+
+## DOW_arb_bt
+*  Goal - create an indicator that tracks DOW stocks individually to identify short-term mispricings within the EDOW index. Backtests using daily close values.
+*  Working on testing on a minute-to-minute basis.
