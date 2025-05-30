@@ -1,0 +1,41 @@
+import yfinance as yf
+import Data_Funcs as df
+import pandas as pd
+import numpy as np
+import matplotlib.pyplot as plt
+
+pd.set_option('display.max_rows', None)
+pd.set_option('display.max_columns', None)
+
+# EDOW - equal weighted DOW Index
+# DOW Tickers
+# (AAPL, AMGN, AXP, BA, CAT, CRM, CSCO, CVX, DIS, DOW, GS, HD, HON, IBM, INTC, JNJ, JPM, KO, MCD, MMM, MRK, MSFT, NKE, PG, TRV, UNH, V, VZ, WBA, WMT)
+
+# Strat - see if there are mispricings between EDOW and sum of all tickers. If EDOW underpriced rel to sum, buy EDOW
+# run this backtest with a modified df.equity_data such that it provides minute by minute updates. On day to day, it seems that it tracks 
+
+tickers = ['AAPL', 'AMGN', 'AXP', 'BA', 'CAT', 'CRM', 'CSCO', 'CVX', 'DIS', 'DOW', 'GS', 'HD', 'HON', 'IBM', 'INTC', 'JNJ', 'JPM', 'KO', 'MCD', 'MMM', 'MRK', 'MSFT', 'NKE', 'PG', 'TRV', 'UNH', 'V', 'VZ', 'WBA', 'WMT']
+
+data = pd.DataFrame()
+sum = df.equity_data('AAPL',252).loc[:,'Close']
+sum = np.array(sum)
+
+for i,tckr in enumerate(tickers):
+    x = df.equity_data(tckr,252).loc[:,'Close']
+    data = pd.concat([data,x],axis=1)
+    sum += np.array(df.equity_data(tckr,252).loc[:,'Close'])
+
+sum = sum - np.array(df.equity_data('AAPL',252).loc[:,'Close'])
+s = df.equity_data('AAPL',252).loc[:,'Close']
+sum = pd.DataFrame(sum/30,columns=['Sum'])
+sum.index = s.index
+EDOW = df.equity_data('EDOW',252).loc[:,'Close']
+arbtable = pd.concat([sum/sum.iloc[0,0],EDOW/EDOW.iloc[0,0]],axis = 1)
+print(arbtable)
+
+plt.figure()
+plt.plot(sum.index,arbtable.loc[:,'Sum'])
+plt.plot(sum.index,arbtable.loc[:,'EDOW'])
+plt.xlabel('Time')
+plt.legend(["Sum","EDOW"])
+plt.show()
