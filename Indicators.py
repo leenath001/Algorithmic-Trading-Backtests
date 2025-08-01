@@ -8,6 +8,8 @@ def simple_moving_average(ticker,period):
 
     def form_b(num):
         return f"{num:.2f}"
+    
+    # testing git
 
     data = df.equity_data(ticker, period)
     close = data.loc[:,'Close']
